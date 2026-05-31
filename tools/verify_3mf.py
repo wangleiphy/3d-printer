@@ -116,17 +116,27 @@ check("volume positive", vol > 0, f"{vol:.1f}")
 print("== round-trip vs STL ==")
 raw = open(stl, "rb").read()
 sV, sT = [], []
-if raw[:5] == b"solid" and b"facet" in raw[:2000]:
-    idx = {}; cur = []
-    def vid(p):
-        k = tuple(round(x,5) for x in p)
-        if k not in idx: idx[k] = len(sV); sV.append(k)
-        return idx[k]
+idx = {}
+def vid(p):
+    k = tuple(round(x,5) for x in p)
+    if k not in idx: idx[k] = len(sV); sV.append(k)
+    return idx[k]
+if raw[:5] == b"solid" and b"facet" in raw[:2000]:        # ASCII STL
+    cur = []
     for line in raw.decode("utf-8","replace").splitlines():
         s = line.split()
         if len(s)==4 and s[0]=="vertex":
             cur.append(tuple(map(float,s[1:])))
             if len(cur)==3: sT.append(tuple(vid(p) for p in cur)); cur=[]
+else:                                                      # binary STL
+    nfac = struct.unpack("<I", raw[80:84])[0]; off = 84
+    for _ in range(nfac):
+        off += 12
+        tri = []
+        for _ in range(3):
+            tri.append(struct.unpack_from("<3f", raw, off)); off += 12
+        off += 2
+        sT.append(tuple(vid(p) for p in tri))
 svol = volume(sV, sT); sbb = bbox(sV)
 check("triangle count matches STL", nt == len(sT), f"3mf={nt} stl={len(sT)}")
 check("bbox matches STL", bb == sbb, f"3mf={bb} stl={sbb}")

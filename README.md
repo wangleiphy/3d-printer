@@ -8,7 +8,7 @@ verifies the mesh before printing. Target printer: Bambu Lab A1.
 
 | | | |
 |---|---|---|
-| **Buckyball (C60)** — open wireframe truncated icosahedron (60 vertices, 90 struts, 12 pentagons + 20 hexagons). Seats on a hexagonal face for brim-free printing. | ![buckyball](buckyball/buckyball_preview.png) | [`buckyball/`](buckyball/) |
+| **Buckyball (C60)** — a family of truncated-icosahedron designs: wireframe cages, an edge frame, a solid faceted ball, and a delicate Voronoi shell. See the [variant index](buckyball/README.md). | ![buckyball](buckyball/voronoi/buckyball_preview.png) | [`buckyball/`](buckyball/) |
 | **XYZ calibration cube** — 20 mm cube with X/Y/Z carved into three faces, for checking dimensional accuracy. | ![cube](xyz_calibration_cube/xyz_cube_preview.png) | [`xyz_calibration_cube/`](xyz_calibration_cube/) |
 
 ## Layout
@@ -34,4 +34,5 @@ python ../tools/stl_to_3mf.py buckyball.stl buckyball.3mf           # pack for B
 reports the size and first-layer footprint, and prints safety reminders. Read
 `PRINT_NOTES.md` in each folder for that design's slicer settings.
 
-Requires OpenSCAD and Python with `numpy` + `matplotlib`.
+Requires OpenSCAD and Python with `numpy` + `matplotlib`. The `voronoi` variant also uses
+`scipy`, `trimesh`, and `manifold3d` (computational geometry, generated via `gen.py`).

@@ -56,7 +56,7 @@ fig = plt.figure(figsize=(13, 3.4), facecolor="white")
 for idx, (el, az, name) in enumerate(views, 1):
     ax = fig.add_subplot(1, 4, idx, projection="3d")
     ax.add_collection3d(Poly3DCollection(tris, facecolors=fc,
-                                         edgecolor="k", linewidths=0.05))
+                                         edgecolor="none", antialiased=True))
     for axis, c in zip("xyz", ctr):
         getattr(ax, f"set_{axis}lim")(c - rad, c + rad)
     ax.set_box_aspect((1, 1, 1)); ax.view_init(elev=el, azim=az)
