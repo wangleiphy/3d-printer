@@ -13,7 +13,10 @@ Each spherical-Voronoi edge is a thin rounded strut projected onto the C60 surfa
 | Outer size | ~77 × 80 × 71 mm (75 mm across the vertices) |
 | Pattern | 60 cells, 150 struts, 2.4 mm strut diameter |
 | Symmetry | full icosahedral, aligned to the C60 |
-| Footprint | ~167 mm² — solid base |
+| Footprint | ~330 mm² — solid (small flat foot fused under the base) |
+
+A thin **flat foot** (`FOOT_D` ≈ 18 mm, `FOOT_H` 0.6 mm) is fused under the bottom for a
+rock-solid first layer; **snip/sand it off** after printing. Set `FOOT_D=0` for none.
 
 Size is set by `DIAM` at the top of `gen.py` (`python gen.py 75`); strut/node/flat all
 scale with it, so the footprint grows ~with size².
@@ -41,9 +44,11 @@ the seed on a symmetry axis.
 - **Supports: ON, tree (auto).** A thin spherical web has overhangs all over the lower
   hemisphere; tree supports are needed for a clean result. The open cells make them
   reachable for removal.
-- **Brim: optional.** The footprint is now ~167 mm² (solid), so a brim is no longer
-  required — add a small one only if you want extra insurance.
-- Drop on the plate as-is (it has a flat bottom from `FLAT`).
+- **Brim: not needed.** The fused flat foot gives a solid ~330 mm² base.
+- **Supports are still required** for the upper overhangs (a hollow sphere arcs over its
+  open cells) — the foot fixes the *base*, not the floating struts. Bambu will warn about
+  "floating regions"; that's expected — enable tree supports and slice.
+- Drop on the plate as-is; snip the foot off after printing.
 
 ## Safety checklist
 **Operation**

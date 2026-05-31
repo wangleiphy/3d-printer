@@ -18,6 +18,8 @@ R_OUT   = DIAM/2             # circumradius (mm)
 STRUT_D = 1.6*sc            # strut diameter — scales with size (stays equally delicate)
 NODE_D  = 2.2*sc            # node diameter
 FLAT    = 1.5*sc            # mm flattened off the bottom for a base
+FOOT_D  = 18.0              # small flat foot diameter (mm); 0 = none. Snip off after print.
+FOOT_H  = 0.6              # foot thickness (mm) — a few layers
 SEED    = np.array([0.34, 0.13, 0.93])   # one generic seed (defines the cell pattern)
 
 # ---- truncated icosahedron: 60 vertices + 32 face planes -------------------
@@ -90,8 +92,15 @@ for i,j in edges:
 for p in P:
     parts.append(trimesh.creation.icosphere(subdivisions=1, radius=NODE_D/2).apply_translation(p))
 mesh=trimesh.boolean.union(parts)
-# flatten the bottom (box difference) and drop it to z=0
-zcut=mesh.bounds[0][2]+FLAT
+zbot=mesh.bounds[0][2]; zcut=zbot+FLAT
+# small flat foot: a disc that reaches UP into the ball to engulf the lowest struts
+# (so it fuses into ONE body), then trimmed flush by the flatten below. Snip off after.
+if FOOT_D>0:
+    z0, z1 = zbot-2.0, zcut+FOOT_H
+    foot=trimesh.creation.cylinder(radius=FOOT_D/2, height=z1-z0, sections=64)
+    foot.apply_translation([0,0,(z0+z1)/2])
+    mesh=trimesh.boolean.union([mesh,foot])
+# flatten the bottom flush and drop it to z=0
 box=trimesh.creation.box(extents=[400,400,400]); box.apply_translation([0,0,zcut-200])
 mesh=trimesh.boolean.difference([mesh,box])
 mesh.apply_translation([0,0,-zcut])
