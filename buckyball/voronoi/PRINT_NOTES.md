@@ -13,10 +13,12 @@ Each spherical-Voronoi edge is a thin rounded strut projected onto the C60 surfa
 | Outer size | ~77 × 80 × 71 mm (75 mm across the vertices) |
 | Pattern | 60 cells, 150 struts, 2.4 mm strut diameter |
 | Symmetry | full icosahedral, aligned to the C60 |
-| Footprint | ~330 mm² — solid (small flat foot fused under the base) |
+| Footprint | ~1588 mm² — solid (modeled-in brim + flat foot fused under the base) |
 
-A thin **flat foot** (`FOOT_D` ≈ 18 mm, `FOOT_H` 0.6 mm) is fused under the bottom for a
-rock-solid first layer; **snip/sand it off** after printing. Set `FOOT_D=0` for none.
+A thin **flat foot** (`FOOT_D` ≈ 18 mm, `FOOT_H` 0.6 mm) plus a wide **modeled-in brim**
+(`BRIM_D` 45 mm, `BRIM_H` 0.4 mm ≈ 2 layers) are fused under the bottom — the foot alone
+detached mid-print once. **Peel the brim and snip/sand the foot off** after printing.
+Set `FOOT_D=0` / `BRIM_D=0` for none.
 
 Size is set by `DIAM` at the top of `gen.py` (`python gen.py 75`); strut/node/flat all
 scale with it, so the footprint grows ~with size².
@@ -44,11 +46,12 @@ the seed on a symmetry axis.
 - **Supports: ON, tree (auto).** A thin spherical web has overhangs all over the lower
   hemisphere; tree supports are needed for a clean result. The open cells make them
   reachable for removal.
-- **Brim: not needed.** The fused flat foot gives a solid ~330 mm² base.
+- **Brim: built into the model.** A 45 mm × 0.4 mm disc is fused under the base (the
+  18 mm foot alone detached mid-print) — no slicer brim needed on top of it.
 - **Supports are still required** for the upper overhangs (a hollow sphere arcs over its
-  open cells) — the foot fixes the *base*, not the floating struts. Bambu will warn about
+  open cells) — the brim fixes the *base*, not the floating struts. Bambu will warn about
   "floating regions"; that's expected — enable tree supports and slice.
-- Drop on the plate as-is; snip the foot off after printing.
+- Drop on the plate as-is; peel the brim and snip the foot off after printing.
 
 ## Safety checklist
 **Operation**
@@ -58,4 +61,8 @@ the seed on a symmetry axis.
 
 **Mesh / design**
 - [ ] `check.sh` reports watertight ✓ and VALID
-- [ ] Supports + brim enabled (small footprint, overhangs)
+- [ ] Tree supports enabled (the brim is already in the model)
+
+> The pre-brim Bambu Studio project (with its slicer settings) is kept as
+> `buckyball_bambu_project.3mf` — open it to recover the settings, but slice the
+> regenerated `buckyball.3mf`.

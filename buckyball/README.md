@@ -5,11 +5,15 @@ Every folder is one self-contained variant with its own source, generated
 `PRINT_NOTES.md`. They share the `../tools/` toolchain. Run `./check.sh` in a folder
 before printing.
 
-The exploration converged on **`voronoi/`** — a delicate, fully-symmetric Voronoi shell.
+The exploration converged on two print-ready siblings: **`voronoi/`** — a delicate,
+fully-symmetric Voronoi shell — and **`ball-and-stick/`** — a pure ball-and-stick C60
+with zero flats. Both are held to the plate by a thin **modeled-in brim** (snip it off
+after printing).
 
 | variant | what it is | symmetry | footprint | mesh |
 |---|---|---|---|---|
-| **`voronoi/`** ⭐ | delicate icosahedral Voronoi web on the C60 form (75 mm) | full icosahedral | 167 mm² | watertight ✓ |
+| **`voronoi/`** ⭐ | delicate icosahedral Voronoi web on the C60 form (75 mm), foot + brim | full icosahedral | 1588 mm² (brim) | watertight ✓ |
+| **`ball-and-stick/`** ⭐ | pure spheres + struts, nothing flattened, snip-off brim (75 mm) | full icosahedral (brim off) | 1789 mm² (brim) | watertight ✓ |
 | `solid/` | solid faceted soccer-ball, engraved seams | full icosahedral | flat face | 4 non-manifold seams* |
 | `edges-only/` | square-beam edge frame, **no node spheres**, pentagon-seated | 5-fold | 387 mm² | watertight ✓ |
 | `symmetric-flats/` | round-strut cage, all 12 pentagons flattened equally | full icosahedral | 203 mm² | watertight ✓ |

@@ -20,6 +20,8 @@ NODE_D  = 2.2*sc            # node diameter
 FLAT    = 1.5*sc            # mm flattened off the bottom for a base
 FOOT_D  = 18.0              # small flat foot diameter (mm); 0 = none. Snip off after print.
 FOOT_H  = 0.6              # foot thickness (mm) — a few layers
+BRIM_D  = 45.0             # wide modeled-in brim diameter (mm); 0 = none. Plate adhesion.
+BRIM_H  = 0.4              # brim thickness (mm) — ~2 layers; peels off like a slicer brim
 SEED    = np.array([0.34, 0.13, 0.93])   # one generic seed (defines the cell pattern)
 
 # ---- truncated icosahedron: 60 vertices + 32 face planes -------------------
@@ -104,6 +106,12 @@ if FOOT_D>0:
 box=trimesh.creation.box(extents=[400,400,400]); box.apply_translation([0,0,zcut-200])
 mesh=trimesh.boolean.difference([mesh,box])
 mesh.apply_translation([0,0,-zcut])
+# wide thin brim fused under the base (the foot alone detached mid-print): welds to
+# the foot and the flattened lowest struts; peel/snip off after printing like a brim.
+if BRIM_D>0:
+    brim=trimesh.creation.cylinder(radius=BRIM_D/2, height=BRIM_H, sections=64)
+    brim.apply_translation([0,0,BRIM_H/2])
+    mesh=trimesh.boolean.union([mesh,brim])
 mesh.export("buckyball.stl")
 mesh.export("buckyball.3mf")     # direct, shared-vertex 3MF (preserves watertightness)
 print(f"watertight={mesh.is_watertight}  faces={len(mesh.faces)}  "
