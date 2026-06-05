@@ -17,10 +17,10 @@ sc      = DIAM/50.0          # scale relative to the original 50 mm design
 R_OUT   = DIAM/2             # circumradius (mm)
 STRUT_D = 1.6*sc            # strut diameter — scales with size (stays equally delicate)
 NODE_D  = 2.2*sc            # node diameter
-FLAT    = 1.5*sc            # mm flattened off the bottom for a base
-FOOT_D  = 18.0              # small flat foot diameter (mm); 0 = none. Snip off after print.
+FLAT    = 0.0              # mm flattened off the bottom; 0 = none → fully symmetric
+FOOT_D  = 0.0              # small flat foot diameter (mm); 0 = none. Needs FLAT>0 (trims it flush).
 FOOT_H  = 0.6              # foot thickness (mm) — a few layers
-BRIM_D  = 45.0             # wide modeled-in brim diameter (mm); 0 = none. Plate adhesion.
+BRIM_D  = 0.0              # wide modeled-in brim diameter (mm); 0 = none → add a brim in Bambu Studio
 BRIM_H  = 0.4              # brim thickness (mm) — ~2 layers; peels off like a slicer brim
 SEED    = np.array([0.34, 0.13, 0.93])   # one generic seed (defines the cell pattern)
 
@@ -98,14 +98,19 @@ zbot=mesh.bounds[0][2]; zcut=zbot+FLAT
 # small flat foot: a disc that reaches UP into the ball to engulf the lowest struts
 # (so it fuses into ONE body), then trimmed flush by the flatten below. Snip off after.
 if FOOT_D>0:
+    assert FLAT>0, "FOOT_D needs FLAT>0 (the flatten trims the foot flush)"
     z0, z1 = zbot-2.0, zcut+FOOT_H
     foot=trimesh.creation.cylinder(radius=FOOT_D/2, height=z1-z0, sections=64)
     foot.apply_translation([0,0,(z0+z1)/2])
     mesh=trimesh.boolean.union([mesh,foot])
-# flatten the bottom flush and drop it to z=0
-box=trimesh.creation.box(extents=[400,400,400]); box.apply_translation([0,0,zcut-200])
-mesh=trimesh.boolean.difference([mesh,box])
-mesh.apply_translation([0,0,-zcut])
+if FLAT>0:
+    # flatten the bottom flush and drop it to z=0
+    box=trimesh.creation.box(extents=[400,400,400]); box.apply_translation([0,0,zcut-200])
+    mesh=trimesh.boolean.difference([mesh,box])
+    mesh.apply_translation([0,0,-zcut])
+else:
+    # nothing cut anywhere — rest the lowest nodes on the plate (fully symmetric)
+    mesh.apply_translation([0,0,-zbot])
 # wide thin brim fused under the base (the foot alone detached mid-print): welds to
 # the foot and the flattened lowest struts; peel/snip off after printing like a brim.
 if BRIM_D>0:

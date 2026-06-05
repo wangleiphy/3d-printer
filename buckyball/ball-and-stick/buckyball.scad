@@ -1,15 +1,16 @@
 // C60 Buckyball — PURE ball-and-stick, perfectly symmetric.
 // 60 sphere joints + 90 cylinder struts; nothing flattened or clipped anywhere.
 // Seated on a pentagon face (5-fold axis vertical, rotation baked into the vertex
-// coordinates, never applied to the finished solid); the 5 lowest balls sink `bite`
-// deep into a thin modeled-in BRIM disc that holds the print on the plate.
-// Snip/peel the brim off after printing → a fully icosahedrally-symmetric ball
-// (5 tiny witness dots on the bottom balls to sand smooth).
+// coordinates, never applied to the finished solid). With brim_d = 0 (default) the
+// model is fully icosahedrally symmetric and the 5 bottom balls just kiss the plate —
+// add a BRIM IN THE SLICER (Bambu Studio) for adhesion instead of a modeled-in one.
+// Set brim_d > 0 to bring back the modeled-in brim disc the 5 lowest balls sink
+// `bite` deep into (snip off after printing; leaves 5 witness dots to sand).
 
 diameter = 75;    // outer diameter at the vertices (mm)
 strut_d  = 5.0;   // strut diameter (mm)
 joint_d  = 7.5;   // ball-joint diameter (mm) — keep clearly > strut_d (clean mesh)
-brim_d   = 48;    // brim disc diameter (mm) — generous skirt around the 5 bottom balls
+brim_d   = 0;     // modeled-in brim disc diameter (mm); 0 = none → add a brim in Bambu Studio
 brim_h   = 0.6;   // brim thickness (mm) — ~3 layers at 0.2 mm; peels/snips off
 bite     = 0.45;  // how deep the 5 bottom balls sink into the brim (fusion depth)
 
@@ -44,9 +45,12 @@ function rotpt(p,axis,ang) = let(uu=axis/norm(axis), c=cos(ang), s=sin(ang))
     p*c + cross(uu,p)*s + uu*(uu*p)*(1-c);
 Vr = [ for (p=V) rotpt(p, rax, rang) ];          // seated vertices
 
-// raise the ball so its 5 lowest balls dip exactly `bite` into the brim
-zlow = min([ for (p=Vr) p[2] ]) - joint_d/2;     // lowest point of the lowest balls
-lift = (brim_h - bite) - zlow;
+// With a brim: raise the ball so its 5 lowest balls dip exactly `bite` into it.
+// Without: seat the TESSELLATED bottom on z=0 — an OpenSCAD sphere has no pole
+// vertex; its lowest facet is a flat cap at r*cos(180/$fn) below the centre.
+zlow  = min([ for (p=Vr) p[2] ]) - joint_d/2;            // analytic ball bottom
+zmesh = min([ for (p=Vr) p[2] ]) - joint_d/2*cos(180/$fn); // tessellated bottom cap
+lift  = brim_d > 0 ? (brim_h - bite) - zlow : -zmesh;
 
 module buckyball() {
     union() {
@@ -57,7 +61,9 @@ module buckyball() {
 
 union() {
     translate([0, 0, lift]) buckyball();
-    cylinder(d=brim_d, h=brim_h);                // modeled-in brim on the plate (z=0)
+    if (brim_d > 0)
+        cylinder(d=brim_d, h=brim_h);            // modeled-in brim on the plate (z=0)
 }
 
-echo(vertices=len(V), edges=len(edges), lift=lift, ball_bottom=brim_h-bite);
+echo(vertices=len(V), edges=len(edges), lift=lift,
+     ball_bottom=brim_d > 0 ? brim_h - bite : 0);

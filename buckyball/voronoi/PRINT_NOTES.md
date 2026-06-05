@@ -10,30 +10,30 @@ Each spherical-Voronoi edge is a thin rounded strut projected onto the C60 surfa
 ## At a glance
 | | |
 |---|---|
-| Outer size | ~77 × 80 × 71 mm (75 mm across the vertices) |
+| Outer size | ~77 × 80 × 73 mm (75 mm across the vertices) |
 | Pattern | 60 cells, 150 struts, 2.4 mm strut diameter |
-| Symmetry | full icosahedral, aligned to the C60 |
-| Footprint | ~1588 mm² — solid (modeled-in brim + flat foot fused under the base) |
+| Symmetry | full icosahedral, aligned to the C60 — **nothing cut or fused anywhere** |
+| Footprint | ~0 mm² (rests on its lowest nodes) — **enable a brim in Bambu Studio** |
 
-A thin **flat foot** (`FOOT_D` ≈ 18 mm, `FOOT_H` 0.6 mm) plus a wide **modeled-in brim**
-(`BRIM_D` 45 mm, `BRIM_H` 0.4 mm ≈ 2 layers) are fused under the bottom — the foot alone
-detached mid-print once. **Peel the brim and snip/sand the foot off** after printing.
-Set `FOOT_D=0` / `BRIM_D=0` for none.
+**No modeled-in brim, foot, or flattening** (`FLAT=0`, `FOOT_D=0`, `BRIM_D=0`): peeling
+the modeled-in brim off damaged the delicate web. Use a **slicer brim in Bambu Studio**
+instead (see settings below) — it releases much more gently. The old base options are
+still in `gen.py` (set `FLAT`/`FOOT_D`/`BRIM_D` > 0) if ever wanted again.
 
-Size is set by `DIAM` at the top of `gen.py` (`python gen.py 75`); strut/node/flat all
-scale with it, so the footprint grows ~with size².
+Size is set by `DIAM` at the top of `gen.py` (`python gen.py 75`); strut and node
+diameters scale with it, so it stays equally delicate.
 
 ## How it's made (different from the OpenSCAD models)
 This shape needs computational geometry, so its **source is `gen.py`** (Python:
 `scipy` Voronoi + `trimesh`/`manifold3d` for fast watertight booleans), which writes
 `buckyball.stl` **and** `buckyball.3mf` directly. To regenerate / re-tune:
 ```bash
-/opt/anaconda3/bin/python gen.py [flat_mm]      # e.g. gen.py 1.5
+/opt/anaconda3/bin/python gen.py [diam_mm]      # e.g. gen.py 75
 ./check.sh
 ```
 Knobs at the top of `gen.py`: `STRUT_D` (delicacy), `SEED` (changes the cell pattern),
-`FLAT` (base). For a **finer** web, replicate 2 seeds (≈120 cells); for **coarser**, put
-the seed on a symmetry axis.
+`FLAT`/`FOOT_D`/`BRIM_D` (modeled-in base — all 0 now). For a **finer** web, replicate
+2 seeds (≈120 cells); for **coarser**, put the seed on a symmetry axis.
 
 ## Before printing — run the safety check
 ```bash
@@ -41,17 +41,25 @@ the seed on a symmetry axis.
 ```
 
 ## Slicer settings (Bambu Studio, Bambu Lab A1) — this one needs support
+**Shortcut: open `buckyball_print.3mf`** — a ready-made Bambu project with everything
+below already set (A1 0.4 nozzle, Bambu PLA Basic, 0.20 mm Standard, textured PEI,
+outer brim 8 mm with 0.1 mm gap, tree supports). Regenerate it with
+`/opt/anaconda3/bin/python ../../tools/bambu_print_3mf.py buckyball.3mf buckyball_print.3mf`.
+Opening the plain `buckyball.3mf` instead needs the settings set by hand:
+
 - **Filament:** black PLA. **Layer height:** 0.16–0.20 mm. **Walls:** the 1.6 mm struts
   print as a few perimeters — no infill needed.
 - **Supports: ON, tree (auto).** A thin spherical web has overhangs all over the lower
   hemisphere; tree supports are needed for a clean result. The open cells make them
   reachable for removal.
-- **Brim: built into the model.** A 45 mm × 0.4 mm disc is fused under the base (the
-  18 mm foot alone detached mid-print) — no slicer brim needed on top of it.
+- **Brim: enable in the slicer** — *Others → Brim type: outer brim*, width ~5 mm,
+  **brim–object gap 0.1 mm** (the gap is what makes it release without tearing the web;
+  the modeled-in brim had none, which is why peeling it hurt the structure).
 - **Supports are still required** for the upper overhangs (a hollow sphere arcs over its
   open cells) — the brim fixes the *base*, not the floating struts. Bambu will warn about
   "floating regions"; that's expected — enable tree supports and slice.
-- Drop on the plate as-is; peel the brim and snip the foot off after printing.
+- Drop on the plate as-is; the slicer brim pops free after printing (run a blade around
+  it if it resists — don't pull upward on the web).
 
 ## Safety checklist
 **Operation**
@@ -61,8 +69,8 @@ the seed on a symmetry axis.
 
 **Mesh / design**
 - [ ] `check.sh` reports watertight ✓ and VALID
-- [ ] Tree supports enabled (the brim is already in the model)
+- [ ] Tree supports enabled **and** slicer brim enabled (the model has no base of its own)
 
-> The pre-brim Bambu Studio project (with its slicer settings) is kept as
+> An older Bambu Studio project (with its slicer settings) is kept as
 > `buckyball_bambu_project.3mf` — open it to recover the settings, but slice the
 > regenerated `buckyball.3mf`.

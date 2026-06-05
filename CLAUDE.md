@@ -15,6 +15,10 @@ A workshop for designing 3D-printable objects as **parametric OpenSCAD models**,
     stl_to_3mf.py            STL -> minimal 3MF Core package
     verify_3mf.py            validate a 3MF (structure + mesh integrity)
     preflight.py             pre-print safety check (verify + size/footprint + reminders)
+    bambu_print_3mf.py       mesh 3MF/STL -> print-ready Bambu PROJECT 3mf via the
+                             BambuStudio CLI (A1 + PLA presets, slicer brim, tree supports
+                             pre-set; key=value args override; reads back + verifies the
+                             embedded settings — still verify the mesh with verify_3mf.py)
   <design>/                  one folder per object, e.g. buckyball/, xyz_calibration_cube/
     <name>.scad              parametric source (edit this)
     <name>.stl / .3mf / _preview.png   generated artifacts
@@ -62,4 +66,5 @@ Then open the `.3mf` in Bambu Studio (`PRINT_NOTES.md` has this design's slicer 
 - **Adding a new design:** make a `<design>/` folder with `<name>.scad`, then copy a `check.sh` (edit the one `<name>` argument) and a `PRINT_NOTES.md` from an existing design as templates. Run the routine from inside the folder.
 - Keep changes scoped to one design + the shared `tools/`. When generalizing a shared script, preserve its behavior for the other designs that already use it (both designs' `check.sh` are the regression test — run them).
 - A design's `<name>.stl`, `<name>_preview.png`, and `<name>.3mf` are generated artifacts — regenerate them from the `.scad`; don't hand-edit. (Exception: a `.3mf` re-saved by Bambu Studio is a print-ready project — keep it, don't regenerate over it.)
-- This directory is not a git repository.
+- **Plate adhesion: use a gapped slicer brim, never a modeled-in one.** A brim modeled into the mesh is welded to the part and tears delicate structures on removal. Keep models fully symmetric (no flats/feet/brims; point contact is fine) and generate a print-ready project with `tools/bambu_print_3mf.py` (outer brim 8 mm, 0.1 mm brim–object gap, tree supports pre-set).
+- This directory is a git repository (`github.com:wangleiphy/3d-printer`); generated artifacts are committed alongside sources.
