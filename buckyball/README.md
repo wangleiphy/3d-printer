@@ -18,6 +18,7 @@ Both folders also carry a ready-to-slice **`buckyball_print.3mf`** Bambu project
 |---|---|---|---|---|
 | **`voronoi/`** ⭐ | delicate icosahedral Voronoi web on the C60 form (75 mm), no base | full icosahedral | ~0 mm² (slicer brim) | watertight ✓ |
 | **`ball-and-stick/`** ⭐ | pure spheres + struts, nothing flattened or fused (75 mm) | full icosahedral | ~0 mm² (slicer brim) | watertight ✓ |
+| **`ball-and-stick-60mm/`** | the same ball-and-stick at 60 mm (strut/ball sizes unchanged) | full icosahedral | ~0 mm² (slicer brim) | watertight ✓ |
 | `solid/` | solid faceted soccer-ball, engraved seams | full icosahedral | flat face | 4 non-manifold seams* |
 | `edges-only/` | square-beam edge frame, **no node spheres**, pentagon-seated | 5-fold | 387 mm² | watertight ✓ |
 | `symmetric-flats/` | round-strut cage, all 12 pentagons flattened equally | full icosahedral | 203 mm² | watertight ✓ |
