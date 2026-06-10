@@ -19,7 +19,7 @@ corner_round  = 3;       // mm, silhouette corner fillet
 
 // ---- Relief ----
 relief_depth  = 1.2;     // mm, engraving depth
-relief_dia    = 55;      // mm, art fits within this width on each cheek
+relief_dia    = 50;      // mm, art fits within this width on each cheek
 relief_x      = -18;     // mm, art centre on the cheek (X)  [tune in Task 5]
 relief_z      = 4;       // mm, art centre on the cheek (Z)  [tune in Task 5]
 
@@ -83,6 +83,18 @@ module head_solid() {
     }
 }
 
+// SVG silhouette -> scaled to relief_dia wide (aspect kept) -> extruded into a cut tool.
+// relief_h is a hair taller than relief_depth so the tool overhangs the cheek for a clean bite.
+relief_h = relief_depth + 2;
+module relief_stamp(file) {
+    // offset(r)offset(-r) heals self-intersecting / overlapping SVG sub-paths into one clean
+    // manifold region (and rounds sub-0.3 mm noise); coarse $fs/$fa keeps the facet count low.
+    linear_extrude(height = relief_h)
+        offset(r = 0.3) offset(r = -0.3)
+            resize([relief_dia, 0], auto = true)
+                import(file, center = true, $fs = 1, $fa = 8);
+}
+
 module head() {
     difference() {
         head_solid();
@@ -91,6 +103,14 @@ module head() {
         translate([0, 0, socket_z])
             rotate([180, 0, 0])
                 hex_prism(60, tenon_af + socket_clear);
+
+        // dragon engraved into the +Y cheek (stamp stood up into the XZ plane, biting -Y)
+        translate([relief_x, head_thick / 2 - relief_depth + relief_h, relief_z])
+            rotate([90, 0, 0]) relief_stamp("art/dragon.svg");
+
+        // phoenix engraved into the -Y cheek (phoenix art is symmetric, so no mirror needed)
+        translate([relief_x, -(head_thick / 2 - relief_depth), relief_z])
+            rotate([90, 0, 0]) relief_stamp("art/phoenix.svg");
     }
 }
 
