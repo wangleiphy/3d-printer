@@ -52,5 +52,45 @@ module handle() {
     }
 }
 
+// 2-D single-bit axe silhouette in XY: +X = poll/eye side, -X = blade, Y = height.
+// Eye centre at origin; handle enters from below (throat at bottom-centre).
+module head_profile() {
+    offset(r = corner_round) offset(r = -corner_round)
+    union() {
+        // eye + poll block (right of centre)
+        translate([13, 0]) square([30, head_height * 0.45], center = true);
+        // blade (flares left to a convex cutting edge)
+        polygon(points = [
+            [ 2,  head_height * 0.27],   // top near eye
+            [-blade_reach * 0.68,  head_height * 0.42],   // toe (upper-left)
+            [-blade_reach,         head_height * 0.03],   // cutting-edge mid (far left)
+            [-blade_reach * 0.74, -head_height * 0.42],   // heel (lower-left)
+            [ 2, -head_height * 0.27],   // bottom near eye
+        ]);
+    }
+}
+
+// Fully-rounded blunt head: shrink the profile/thickness by edge_round, then Minkowski a
+// sphere back on so EVERY edge (cheeks + blade) is rounded -> kid-safe, no sharp tip.
+module head_solid() {
+    minkowski() {
+        rotate([90, 0, 0])
+            linear_extrude(height = head_thick - 2 * edge_round, center = true)
+                offset(r = -edge_round) head_profile();
+        sphere(r = edge_round, $fn = 24);
+    }
+}
+
+module head() {
+    difference() {
+        head_solid();
+        // hex socket in the throat, opening downward (handle plugs up into it)
+        translate([0, 0, socket_z])
+            rotate([180, 0, 0])
+                hex_prism(socket_depth + eps, tenon_af + socket_clear);
+    }
+}
+
 if (part == "handle") handle();
-else cube([blade_reach, head_thick, head_height], center = true);   // head still placeholder
+else if (part == "head") head();
+else { head(); translate([0, 0, socket_z - socket_depth + eps]) handle(); }   // assembled preview
