@@ -27,7 +27,7 @@ relief_z      = 4;       // mm, art centre on the cheek (Z)  [tune in Task 5]
 tenon_af      = 12;      // mm across flats (handle tenon)
 socket_clear  = 0.2;     // mm across flats (~0.1 mm/side), per golden-cudgel precedent
 socket_depth  = 24;      // mm
-socket_z      = -8;      // mm, where the socket starts in the head throat [tune in Task 4]
+socket_z      = 5;       // mm, socket ceiling height in the head throat (~socket_depth deep)
 
 $fn = 64;
 eps = 0.05;
@@ -55,19 +55,21 @@ module handle() {
 // 2-D single-bit axe silhouette in XY: +X = poll/eye side, -X = blade, Y = height.
 // Eye centre at origin; handle enters from below (throat at bottom-centre).
 module head_profile() {
-    offset(r = corner_round) offset(r = -corner_round)
-    union() {
-        // eye + poll block (right of centre)
-        translate([13, 0]) square([30, head_height * 0.45], center = true);
-        // blade (flares left to a convex cutting edge)
-        polygon(points = [
-            [ 2,  head_height * 0.27],   // top near eye
-            [-blade_reach * 0.68,  head_height * 0.42],   // toe (upper-left)
-            [-blade_reach,         head_height * 0.03],   // cutting-edge mid (far left)
-            [-blade_reach * 0.74, -head_height * 0.42],   // heel (lower-left)
-            [ 2, -head_height * 0.27],   // bottom near eye
-        ]);
-    }
+    // Single-bit hatchet outline (corners rounded by the offset idiom): a short poll block
+    // on the right, a flared blade on the left whose cutting edge is a convex arc from the
+    // toe (top) through the tip to the heel (bottom). Bottom edge dips to the throat at x=0.
+    offset(r = 3) offset(r = -3)
+    polygon(points = [
+        [ 30,                head_height * 0.19],   // poll top-right
+        [-5,                 head_height * 0.24],   // eye top
+        [-blade_reach * 0.78, head_height * 0.50],  // toe (top of cutting edge)
+        [-blade_reach * 0.96, head_height * 0.275], // cutting edge upper
+        [-blade_reach,        0],                    // cutting edge tip (far left)
+        [-blade_reach * 0.96,-head_height * 0.275], // cutting edge lower
+        [-blade_reach * 0.78,-head_height * 0.50],  // heel (bottom of cutting edge)
+        [-5,                 -head_height * 0.24],   // eye bottom
+        [ 30,               -head_height * 0.19],   // poll bottom-right
+    ]);
 }
 
 // Fully-rounded blunt head: shrink the profile/thickness by edge_round, then Minkowski a
@@ -84,13 +86,14 @@ module head_solid() {
 module head() {
     difference() {
         head_solid();
-        // hex socket in the throat, opening downward (handle plugs up into it)
+        // hex socket: a long downward prism that pierces the bottom throat (opens for the
+        // handle tenon); its ceiling sits at z = socket_z, giving ~socket_depth usable depth.
         translate([0, 0, socket_z])
             rotate([180, 0, 0])
-                hex_prism(socket_depth + eps, tenon_af + socket_clear);
+                hex_prism(60, tenon_af + socket_clear);
     }
 }
 
 if (part == "handle") handle();
 else if (part == "head") head();
-else { head(); translate([0, 0, socket_z - socket_depth + eps]) handle(); }   // assembled preview
+else { head(); translate([0, 0, socket_z - handle_length - socket_depth + eps]) handle(); }   // assembled preview
