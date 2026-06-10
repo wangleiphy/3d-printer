@@ -32,6 +32,25 @@ socket_z      = -8;      // mm, where the socket starts in the head throat [tune
 $fn = 64;
 eps = 0.05;
 
-// placeholder until modules land
-if (part == "handle") sphere(d = knob_d);
-else cube([blade_reach, head_thick, head_height], center = true);
+module hex_prism(h, af) {            // af = across flats
+    cylinder(h = h, r = af / sqrt(3), $fn = 6);
+}
+
+module handle() {
+    union() {
+        // smooth tapered shaft: knob -> grip swell -> slim neck (hull of spheres = clean & manifold)
+        hull() {
+            sphere(d = knob_d, $fn = $fn);
+            translate([0, 0, handle_length * 0.5]) sphere(d = grip_d, $fn = $fn);
+        }
+        hull() {
+            translate([0, 0, handle_length * 0.5]) sphere(d = grip_d, $fn = $fn);
+            translate([0, 0, handle_length])       sphere(d = neck_d, $fn = $fn);
+        }
+        // hex tenon on top (plugs into head socket)
+        translate([0, 0, handle_length - eps]) hex_prism(socket_depth, tenon_af);
+    }
+}
+
+if (part == "handle") handle();
+else cube([blade_reach, head_thick, head_height], center = true);   // head still placeholder
