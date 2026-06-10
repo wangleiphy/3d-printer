@@ -4,12 +4,6 @@ A ~281 mm single-bit toy hatchet for a young child. One cheek of the head carrie
 **dragon (龙)**, the other a **phoenix (凤)**, recessed ~1.2 mm. Prints as two parts —
 **head + handle** — joined by a glued hex tenon.
 
-![assembled](dragon_phoenix_axe_assembled_preview.png)
-
-| dragon cheek | phoenix cheek |
-|---|---|
-| ![dragon](dragon_phoenix_axe_dragon_cheek.png) | ![phoenix](dragon_phoenix_axe_phoenix_cheek.png) |
-
 ## At a glance
 | | |
 |---|---|
@@ -23,21 +17,21 @@ A ~281 mm single-bit toy hatchet for a young child. One cheek of the head carrie
 
 ## Before printing — run the safety check
 ```bash
-./check.sh        # preflights BOTH parts; do not print on a mesh FAIL
+./check.sh        # preflights both parts + combined print orientation; do not print on a FAIL
 ```
-Both parts report a **tiny first-layer footprint** — that's expected (they stand on small
-faces). The slicer brim below handles adhesion; don't add a modeled-in brim.
+The source meshes report small first-layer footprints because the STL files are stored in
+their model-space orientation. The combined print file below places the head on its flat poll
+edge and the handle on its flat hex tenon.
 
 ## Slicer settings (Bambu Studio, Bambu Lab A1, PLA)
-Open the print-ready projects (already preset with an outer brim 8 mm / 0.1 mm gap + tree
-supports): `dragon_phoenix_axe_head_print.3mf`, `dragon_phoenix_axe_handle_print.3mf`.
+Open the combined print file: `dragon_phoenix_axe_head_handle_print.3mf`.
 - **Layer height:** 0.2 mm. **Walls:** 3. **Infill:** 10–15 % (keep it light — it's swung).
-- **Head orientation — important:** stand the head so **both cheeks are vertical** (rotate it
-  off the auto-arranged flat-on-cheek pose). That prints both engravings at equal quality.
-  Leave tree supports on for the toe overhang.
-- **Handle orientation:** standing (vertical) prints support-free and fits the 256 mm bed.
-  For a tougher handle, lay it horizontal with tree supports instead (stronger across the
-  swing axis).
+- **Brim/supports:** enable an outer brim. Use tree supports for the head/blade overhang.
+- **Head orientation:** object 1 stands on the flat poll edge; both cheeks stay vertical so
+  dragon/phoenix engravings print at equal quality.
+- **Handle orientation:** object 2 stands vertically with the flat hex tenon on the plate.
+  Combined height is ~246.9 mm, so it fits the A1 volume but is close to the Z limit.
+  If Bambu offers *Auto orient / Place on face*, decline it.
 
 ## Assembly
 - Dry-fit the handle tenon into the head's bottom socket; it should slip in with light friction.
@@ -55,6 +49,7 @@ supports): `dragon_phoenix_axe_head_print.3mf`, `dragon_phoenix_axe_handle_print
 
 **Mesh / design**
 - [ ] `./check.sh` reports watertight ✓ / VALID for both parts
+- [ ] `./check.sh` reports the combined print file has a ~103 mm upright head and ~247 mm upright handle
 - [ ] Head bbox ≈ 103 × 22 × 78 mm; handle ≈ 26 × 26 × 247 mm
 
 ## Relief art provenance & licence
@@ -73,8 +68,8 @@ Edit the parameters at the top of `dragon_phoenix_axe.scad` (e.g. `relief_dia`, 
 ```bash
 openscad -D 'part="head"'   -o dragon_phoenix_axe_head.stl   dragon_phoenix_axe.scad
 openscad -D 'part="handle"' -o dragon_phoenix_axe_handle.stl dragon_phoenix_axe.scad
-/opt/anaconda3/bin/python ../tools/preview.py dragon_phoenix_axe_head.stl
 /opt/anaconda3/bin/python ../tools/stl_to_3mf.py dragon_phoenix_axe_head.stl dragon_phoenix_axe_head.3mf
+/opt/anaconda3/bin/python ../tools/stl_to_3mf.py dragon_phoenix_axe_handle.stl dragon_phoenix_axe_handle.3mf
 ./check.sh
 ```
 To swap the art, replace `art/dragon.svg` / `art/phoenix.svg` with another bold, connected
